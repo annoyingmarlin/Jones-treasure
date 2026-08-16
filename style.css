@@ -1,0 +1,566 @@
+/* =========================================================
+   SLOT MACHINE CABINET STYLES
+   Color palette + layout for a wooden/brass mechanical
+   slot machine UI.
+   ========================================================= */
+
+/* ---- Color palette ----
+   Centralized here so the whole theme can be re-skinned
+   (e.g. for the sunken-treasure version) by editing these
+   variables instead of hunting through the file. */
+:root{
+--wood-dark:#839692;      /* darkest cabinet wood tone */
+--wood-mid:#5c6566;       /* mid wood tone, used for inset border */
+--wood-light:#165991;     /* lightest wood tone, top of cabinet gradient */
+--brass:#c89b3c;          /* main brass/metal accent color */
+--brass-light:#eccf87;    /* highlight brass, used on buttons/shine */
+--brass-dark:#cf8e13;     /* shadowed brass, used for borders */
+--cream:#f2e8d5;          /* reel window background (paper/ivory look) */
+--red-signal:#9c2f2f;     /* payline + lever knob accent color */
+--green-felt:#2f4a3c;     /* reserved felt-green tone (currently unused) */
+--green-light:#000000;    /* win-message text color */
+}
+
+/* Use border-box everywhere so padding/border don't blow out sizing */
+*{box-sizing:border-box;}
+
+/* ---- Page background ----
+   Centers the cabinet in the viewport on a dark radial
+   background, like a spotlight on the machine. */
+body{
+margin:0;
+min-height:100vh;
+display:flex;
+align-items:center;
+justify-content:center;
+background:radial-gradient(circle at 50% 20%,#d3b9a9,#0a0603);
+font-family:'Trebuchet MS','Segoe UI',sans-serif;
+padding:32px 16px;
+}
+
+/* ---- Cabinet shell ----
+   The outer wooden housing that contains everything else. */
+.cabinet{
+width:420px;
+background:linear-gradient(180deg,var(--wood-light),var(--wood-dark) 60%);
+border-radius:18px;
+padding:22px;
+border:3px solid var(--wood-dark);
+box-shadow:0 20px 50px rgba(0,0,0,.6), inset 0 0 0 6px var(--wood-mid);
+position:relative; /* anchors the lever + corner rivets, and is the video's containing block */
+}
+
+/* ---- Corner rivets ----
+   Small brass "bolts" pinned to each corner of the cabinet
+   for a riveted-metal-plate look. Positioned individually
+   with the .tl/.tr/.bl/.br modifiers below. */
+.rivet{
+position:absolute;
+width:12px;height:12px;
+border-radius:50%;
+background:radial-gradient(circle at 35% 35%,var(--brass-light),var(--brass-dark));
+}
+.rivet.tl{top:12px;left:12px;} .rivet.tr{top:12px;right:12px;}
+.rivet.bl{bottom:12px;left:12px;} .rivet.br{bottom:12px;right:12px;}
+
+/* ---- Marquee header ----
+   Title + subtitle area at the top of the cabinet, styled
+   like an old carnival sign. */
+.marquee{
+text-align:center;
+padding:8px 4px 10px;
+}
+.logo{
+max-width:100%;
+height:auto;
+display:inline-block;
+}
+
+.character-container {
+text-align:center;
+padding:8px 4px 10px;
+}
+.character{
+max-width:100%;
+height: 350px;
+display:inline-block;
+}
+
+/* ---- Jackpot feature banner ----
+   Sits between the logo and the reels — the "room for more
+   features" area from the reference image. Four colored
+   tiles, each showing a jackpot tier name and amount. Colors
+   are deliberately distinct per tier so they read at a glance,
+   like the reference's red/blue/green/pink tiles. */
+.jackpot-banner{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:4px;
+margin-bottom:10px;
+}
+.jackpot-tile{
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+padding:6px 4px;
+border-radius:6px;
+border:2px solid var(--brass-dark);
+}
+.jackpot-tile .jp-label{
+font-size:10px;
+font-weight:700;
+letter-spacing:2px;
+text-transform:uppercase;
+}
+.jackpot-tile .jp-amount{
+font-family:'Courier New',monospace;
+font-size:13px;
+font-weight:700;
+margin-top:2px;
+}
+.jackpot-tile.grand{background:linear-gradient(180deg,#7a2020,#4a1010); }
+.jackpot-tile.grand .jp-label{color:#ffd35c;}
+.jackpot-tile.grand .jp-amount{color:#ffefc2;}
+.jackpot-tile.major{background:linear-gradient(180deg,#152a5c,#0a1738);}
+.jackpot-tile.major .jp-label{color:#ffd35c;}
+.jackpot-tile.major .jp-amount{color:#dff0ff;}
+.jackpot-tile.minor{background:linear-gradient(180deg,#153a1f,#0a2412);}
+.jackpot-tile.minor .jp-label{color:#8fffb0;}
+.jackpot-tile.minor .jp-amount{color:#e4ffe9;}
+.jackpot-tile.mini{background:linear-gradient(180deg,#4a1140,#2a0924);}
+.jackpot-tile.mini .jp-label{color:#ff8fd0;}
+.jackpot-tile.mini .jp-amount{color:#ffe4f6;}
+
+/* ---- Reel viewport ----
+   The dark "glass" panel that houses the three spinning
+   reel windows. position:relative lets the payline overlay
+   sit on top of it. */
+.glass{
+background:rgba(14,11,8,0.25); /* was a solid gradient — now a light dark tint so the video reads through here too */
+border-radius:6px;
+padding:0;
+border:4px solid var(--brass-dark);
+box-shadow:inset 0 6px 18px rgba(0,0,0,.7);
+overflow:hidden; /* keeps the flush cells from poking past the rounded corners */
+position:relative;
+}
+
+/* ---- Background video ----
+   Covers the entire cabinet interior, sitting behind the
+   logo, jackpot banner, and reel grid. It's the first child
+   of .cabinet in the HTML and absolutely positioned against
+   it (.cabinet has position:relative), so top:0/left:0/100%
+   fills exactly the cabinet's padded content area.
+
+   Rounded on its own corners (rather than relying on
+   .cabinet's overflow:hidden) because .lever-wrap sits
+   outside the cabinet's bounds — clipping the cabinet would
+   cut the lever off too. */
+.glass-video{
+position:absolute;
+top:0; left:0;
+width:100%; height:100%;
+object-fit:cover;
+border-radius:15px;
+z-index:0;
+}
+
+/* Every direct child of .cabinet that should appear ON TOP
+   of the video needs BOTH position (anything but static) AND
+   a z-index higher than the video's. z-index alone does
+   nothing on a statically-positioned element — that's the
+   bug from before. .glass and .lever-wrap already have their
+   own position set elsewhere, so only these need it added. */
+.marquee, .jackpot-banner, .readouts, .message, .controls, .paytable, .character-container{
+position:relative;
+z-index:1;
+}
+.glass, .lever-wrap{ z-index:1; }
+
+/* ---- Reel grid: 5 columns x 4 rows ----
+   .reels-grid lays the 5 columns out side by side. Each
+   .reel-col holds ONE .reel-window (clips to exactly 4
+   visible cells) containing ONE .reel-strip — the strip is
+   what gets translateY'd by ReelEngine.spinColumn, so all 4
+   visible cells scroll together as a single continuous reel
+   instead of 4 independently-spinning boxes. */
+.reels-grid{
+display:flex;
+flex-direction:row;
+}
+.reel-col{
+flex:1 1 0;
+position:relative;
+}
+
+/* Clips the strip to exactly ROWS (4) visible symbols.
+   Height = CELL_H * ROWS = 64 * 4 — keep in sync with
+   Config.CELL_H / Config.ROWS in script.js. */
+.reel-window{
+height:256px;
+overflow:hidden;
+position:relative;
+background:rgba(242,232,213,0.42); /* semi-transparent so .glass-video shows through, same idea as before */
+border-right:1px solid rgba(0,0,0,.25); /* thin shared divider between columns */
+}
+.reel-col:last-child .reel-window{ border-right:none; }
+
+.reel-strip{
+position:absolute;
+top:0; left:0; width:100%;
+display:flex;
+flex-direction:column;
+will-change:transform; /* hints the browser to optimize the spin animation */
+}
+
+.symbol{
+height:64px;
+width:100%;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:32px;
+line-height:1;
+border-bottom:1px solid rgba(0,0,0,.15); /* thin shared divider between rows within a column */
+}
+
+/* Distinct look per symbol type so wild/clam/shovel read
+   instantly during play, on top of their emoji. */
+.symbol.sym-wild{ background:rgba(255,211,63,0.35); box-shadow:inset 0 0 10px rgba(255,211,63,.8); }
+.symbol.sym-bonus{ background:rgba(124,255,92,0.28); box-shadow:inset 0 0 10px rgba(124,255,92,.7); }
+.symbol.sym-shovel{ background:rgba(200,220,255,0.35); box-shadow:inset 0 0 10px rgba(200,220,255,.8); }
+
+/* ---- Cell frame overlay ----
+   A static (non-scrolling) grid laid on top of each reel
+   window, one frame per visible row. Used for win-line
+   highlighting and, during the bonus game, the persistent
+   silver/gold/diamond shovel borders. Sits above the
+   scrolling .reel-strip but ignores clicks. */
+.cell-frames{
+position:absolute;
+top:0; left:0; width:100%; height:100%;
+display:flex;
+flex-direction:column;
+pointer-events:none;
+z-index:2;
+}
+.cell-frame{
+flex:1 1 0;
+box-sizing:border-box;
+border:3px solid transparent;
+transition:border-color .25s, background-color .3s, opacity .3s;
+}
+.cell-frame.win-highlight{
+background:rgba(255,255,255,.22);
+border-color:rgba(255,255,255,.6);
+}
+.cell-frame.lvl-silver{ border-color:#cfd8e3; box-shadow:inset 0 0 8px rgba(207,216,227,.7); }
+.cell-frame.lvl-gold{ border-color:#eccf87; box-shadow:inset 0 0 8px rgba(236,207,135,.8); }
+.cell-frame.lvl-diamond{ border-color:#7fe3ff; box-shadow:inset 0 0 10px rgba(127,227,255,.9); }
+.cell-frame.dimmed{ background:rgba(0,0,0,.6); }
+.cell-frame.earned{ background:rgba(255,255,255,.08); }
+.cell-frame.digging{ animation:dig .42s ease; }
+@keyframes dig{
+0%{ transform:scale(1); }
+40%{ transform:scale(.86) rotate(-3deg); }
+100%{ transform:scale(1); }
+}
+
+/* ---- Clam-opening + bonus overlays ----
+   Both sit on top of the reel grid (inside .glass, which is
+   already position:relative + overflow:hidden) so the bonus
+   sequence visually replaces the reels rather than covering
+   the whole cabinet. */
+.hidden{ display:none !important; }
+
+.clam-overlay, .bonus-overlay{
+position:absolute;
+top:0; left:0; right:0; bottom:0;
+z-index:5;
+background:rgba(6,20,24,.9);
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+gap:10px;
+padding:14px;
+text-align:center;
+color:var(--cream);
+}
+.clam-overlay .clam-icon{
+font-size:34px;
+display:inline-block;
+margin:3px;
+transition:transform .25s;
+}
+.clam-overlay .clam-icon.opened{ transform:scale(1.3); }
+
+.bonus-header{
+display:flex;
+flex-direction:column;
+gap:2px;
+}
+.bonus-title{
+font-family:Georgia,'Times New Roman',serif;
+font-weight:700;
+font-style:italic;
+font-size:18px;
+color:var(--brass-light);
+}
+.bonus-spins{ font-size:13px; color:#cbb489; }
+.bonus-spins b{ color:var(--cream); }
+
+.bonus-notice{
+font-size:14px;
+font-weight:700;
+color:#8fffb0;
+background:rgba(47,74,60,.6);
+border:1px solid var(--green-light);
+border-radius:8px;
+padding:6px 12px;
+}
+
+.chest-reveal-title{
+font-size:15px;
+font-weight:700;
+letter-spacing:1px;
+color:var(--brass-light);
+text-transform:uppercase;
+}
+.chest-list{
+display:flex;
+flex-wrap:wrap;
+gap:8px;
+justify-content:center;
+max-width:320px;
+}
+.chest-item{
+display:flex;
+flex-direction:column;
+align-items:center;
+gap:2px;
+padding:8px 10px;
+border-radius:8px;
+background:rgba(0,0,0,.35);
+border:2px solid var(--brass-dark);
+animation:chestPop .4s ease;
+}
+.chest-item .chest-icon{ font-size:22px; }
+.chest-item .chest-val{ font-size:12px; font-weight:700; color:var(--brass-light); }
+.chest-item.chest-diamond{ border-color:#7fe3ff; }
+.chest-item.chest-gold{ border-color:#eccf87; }
+.chest-item.chest-silver{ border-color:#cfd8e3; }
+@keyframes chestPop{
+0%{ transform:scale(.5); opacity:0; }
+100%{ transform:scale(1); opacity:1; }
+}
+.chest-total{ font-size:15px; font-weight:700; color:var(--cream); }
+.chest-total b{ color:#8fffb0; }
+
+/* ---- Readouts (credits / bet display) ----
+   Two side-by-side digital-style displays below the reels. */
+.readouts{
+display:flex;
+justify-content:space-between;
+gap:12px;
+margin:16px 0;
+}
+.readout{
+flex:1;
+background:#0e0b08;
+border:2px solid var(--brass-dark);
+border-radius:6px;
+padding:8px 10px;
+text-align:center;
+}
+.readout .label{
+font-size:9px;
+letter-spacing:2px;
+text-transform:uppercase;
+color:#a4855c;
+}
+.readout .value{
+font-family:'Courier New',monospace; /* mechanical odometer feel */
+font-weight:700;
+font-size:22px;
+color:var(--brass-light);
+letter-spacing:2px;
+margin-top:2px;
+}
+
+/* ---- Result message ----
+   Shows spin outcome text ("Jackpot!", "No match", etc).
+   Green by default; .lose modifier switches it to a muted
+   red/pink for losing spins. */
+.message{
+min-height:20px; /* reserves space so layout doesn't jump when empty */
+text-align:center;
+font-size:20px;
+font-weight:700;
+letter-spacing:1px;
+color:var(--green-light);
+margin-bottom:12px;
+}
+.message.lose{color:#2b0000;}
+
+/* ---- Controls row ----
+   Bet adjuster + Spin button, side by side. */
+.controls{
+display:flex;
+align-items:center;
+gap:16px;
+}
+
+/* Pill-shaped bet stepper with -/+ buttons and a live value. */
+.bet-control{
+display:flex;
+align-items:center;
+gap:6px;
+background:#0e0b08;
+border:2px solid var(--brass-dark);
+border-radius:20px;
+padding:4px 8px;
+}
+.bet-control button{
+width:26px;height:26px;
+border-radius:50%;
+border:1px solid var(--brass-dark);
+background:linear-gradient(180deg,var(--brass-light),var(--brass));
+color:var(--wood-dark);
+font-weight:700;
+font-size:14px;
+cursor:pointer;
+}
+.bet-control button:active{transform:scale(.92);} /* tactile press feedback */
+.bet-control span{
+font-family:'Courier New',monospace;
+color:var(--cream);
+font-size:13px;
+min-width:44px; /* keeps width stable as the number of digits changes */
+text-align:center;
+}
+
+/* Main brass push-button that triggers a spin. */
+.spin-btn{
+flex:1;
+height:52px;
+border-radius:26px;
+border:2px solid var(--brass-dark);
+background:radial-gradient(circle at 35% 30%,var(--brass-light),var(--brass) 60%,var(--brass-dark));
+color:var(--wood-dark);
+font-weight:700;
+font-size:15px;
+letter-spacing:2px;
+text-transform:uppercase;
+cursor:pointer;
+box-shadow:0 4px 0 var(--brass-dark), 0 6px 10px rgba(0,0,0,.4); /* gives the button "height" */
+}
+/* Pressed state: button sinks down to meet its shadow */
+.spin-btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--brass-dark);}
+.spin-btn:disabled{opacity:.5;cursor:default;transform:none;box-shadow:0 4px 0 var(--brass-dark);}
+
+/* ---- Side lever ----
+   Draggable/clickable arm on the right edge of the cabinet
+   that also triggers a spin, for the "one-armed bandit"
+   feel. Positioned absolutely relative to .cabinet. */
+.lever-wrap{
+position:absolute;
+right:-40px;
+top:700px;
+width:40px;
+height:220px;
+cursor:pointer;
+user-select:none;
+-webkit-user-select:none;
+touch-action:none; /* prevents scroll gestures from hijacking drag on touch */
+}
+
+/* The vertical channel the lever stick appears to slide in */
+.lever-track{
+position:absolute;
+left:50%;
+top:10px;
+bottom:40px;
+width:8px;
+transform:translateX(-50%);
+background:linear-gradient(180deg,var(--wood-dark),var(--wood-light));
+border-radius:4px;
+box-shadow:inset 0 0 6px rgba(0,0,0,.6);
+}
+
+/* Circular brass base the lever pivots from */
+.lever-base{
+position:absolute;
+left:50%;bottom:0;
+width:34px;height:34px;
+transform:translateX(-50%);
+border-radius:50%;
+background:radial-gradient(circle at 35% 35%,var(--brass-light),var(--brass-dark));
+box-shadow:0 3px 6px rgba(0,0,0,.5);
+}
+
+/* The lever arm itself. transform-origin is set to the
+   bottom so rotation pivots from the base, not the center. */
+.lever-stick{
+position:absolute;
+left:50%;
+bottom:16px;
+width:8px;
+height:170px;
+transform-origin:bottom center;
+transform:translateX(-50%) rotate(0deg);
+background:linear-gradient(90deg,var(--brass-dark),var(--brass-light) 45%,var(--brass-dark));
+border-radius:4px;
+}
+
+/* Red ball knob at the top of the lever */
+.lever-knob{
+position:absolute;
+top:-16px;left:50%;
+width:32px;height:32px;
+transform:translateX(-50%);
+border-radius:50%;
+background:radial-gradient(circle at 35% 30%,#d94a4a,var(--red-signal));
+box-shadow:0 3px 8px rgba(0,0,0,.5), inset 0 0 6px rgba(255,255,255,.2);
+}
+
+/* Animation states toggled via JS:
+   .pulled  = quick snap down when the lever is pulled
+   .reset   = springy bounce-back to the resting position */
+.lever-stick.pulled{transition:transform .18s ease-out;transform:translateX(-50%) rotate(38deg);}
+.lever-stick.reset{transition:transform .5s cubic-bezier(.34,1.6,.4,1);transform:translateX(-50%) rotate(0deg);}
+
+/* ---- Paytable ----
+   Small 3-column grid at the bottom showing symbol
+   combinations and their payout multipliers. */
+.paytable{
+margin-top:18px;
+padding-top:12px;
+border-top:2px solid var(--brass-dark);
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:6px;
+}
+.paytable div{
+background:#0e0b08;
+border:1px solid var(--brass-dark);
+border-radius:6px;
+text-align:center;
+padding:6px 2px;
+font-size:11px;
+color:#cbb489;
+}
+.paytable div b{
+display:block;
+font-size:16px;
+color:var(--brass-light);
+}
+
+/* ---- Small screens ----
+   Cabinet goes full-width and the side lever is hidden
+   (no room for it, and dragging is awkward on mobile). */
+@media (max-width:460px){
+.cabinet{width:100%;}
+.lever-wrap{display:none;}
+}
